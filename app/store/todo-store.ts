@@ -22,56 +22,71 @@ export const useTodoStore = create<State>((set) => ({
   lists: [],
   setLists: (lists) => set({ lists }),
   setList: async (item) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const previousLists = useTodoStore.getState().lists;
+    const nextLists = [...previousLists, item];
 
-    if (user) {
-      await createTodo(item);
-    } else {
-      const newLists = [...useTodoStore.getState().lists, item];
-      localStorage.setItem("todo-list", JSON.stringify(newLists));
+    set({ lists: nextLists });
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await createTodo(item);
+      } else {
+        localStorage.setItem("todo-list", JSON.stringify(nextLists));
+      }
+    } catch (error) {
+      set({ lists: previousLists });
+      console.error(`할 일 추가 실패 : ${error}`);
     }
-
-    set((state) => ({
-      lists: [...state.lists, item],
-    }));
   },
   removeList: async (id) => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    const newLists = useTodoStore.getState().lists.filter((list) => list.id !== id);
+    const previousLists = useTodoStore.getState().lists;
+    const nextLists = previousLists.filter((list) => list.id !== id);
 
-    if (user) {
-      await deleteTodo(id);
-    } else {
-      localStorage.setItem("todo-list", JSON.stringify(newLists));
+    set({ lists: nextLists });
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await deleteTodo(id);
+      } else {
+        localStorage.setItem("todo-list", JSON.stringify(nextLists));
+      }
+    } catch (error) {
+      set({ lists: previousLists });
+      console.error(`할 일 추가 실패 : ${error}`);
     }
-
-    set({ lists: newLists });
   },
   toggleComplete: async (id) => {
-    const lists = useTodoStore.getState().lists;
-    const target = lists.find((list) => list.id === id);
+    const previousLists = useTodoStore.getState().lists;
+    const target = previousLists.find((list) => list.id === id);
+
+    if (!target) return;
 
     const complete = !target?.complete;
 
-    if (!target) return;
-    const newLists = lists.map((list) => (list.id === id ? { ...list, complete } : list));
+    const nextLists = previousLists.map((list) => (list.id === id ? { ...list, complete } : list));
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    set({ lists: nextLists });
 
-    if (user) {
-      await completeTodo(id, complete);
-    } else {
-      localStorage.setItem("todo-list", JSON.stringify(newLists));
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await completeTodo(id, complete);
+      } else {
+        localStorage.setItem("todo-list", JSON.stringify(nextLists));
+      }
+    } catch (error) {
+      set({ lists: previousLists });
+      console.error(`할 일 추가 실패 : ${error}`);
     }
-
-    set({
-      lists: newLists,
-    });
   },
 }));
