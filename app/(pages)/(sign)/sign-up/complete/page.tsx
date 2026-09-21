@@ -1,0 +1,32 @@
+import Link from "next/link";
+
+import SignSection from "../../../../components/sign/sign-section";
+import SignTitle from "../../../../components/sign/sign-title";
+
+export default function SignUpCompletePage() {
+  return (
+    <SignSection>
+      <SignTitle
+        title="회원가입 완료"
+        description={
+          <>
+            입력하신 이메일로 인증 메일을 보내드렸습니다. <br />
+            이메일을 확인하여 인증을 완료해주세요.
+          </>
+        }
+      />
+      <Link href="/sign-in" className="flex items-center justify-center w-full h-[40px] mt-3 bg-(--primary) rounded-md text-white cursor-pointer transition-colors hover:bg-[#4573e9]">
+        로그인
+      </Link>
+      <p className="relative w-full py-3 text-center before:absolute before:left-0 before:top-[50%] before:w-full before:h-[1px] before:bg-slate-200 before:translate-y-[-50%] before:z-0">
+        <span className="relative z-1 bg-white px-2 text-sm text-slate-400">또는</span>
+      </p>
+      <p className="text-sm text-slate-400">
+        <Link href="/" className="ml-1 text-(--primary) font-medium hover:text-[#4471e2] transition-colors">
+          홈
+        </Link>
+        으로 돌아가기
+      </p>
+    </SignSection>
+  );
+}

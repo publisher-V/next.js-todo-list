@@ -1,0 +1,23 @@
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
+
+export async function createClient() {
+  const cookiesStore = await cookies();
+
+  return createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+    cookies: {
+      getAll() {
+        return cookiesStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            cookiesStore.set(name, value, options);
+          });
+        } catch {
+          // Server Component에서는 쿠키를 설정할 수 없으므로 무시
+        }
+      },
+    },
+  });
+}

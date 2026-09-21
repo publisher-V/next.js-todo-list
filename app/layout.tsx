@@ -16,14 +16,17 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
-  title: "브이의 할 일 기록소",
+  title: "모두의 할 일 리스트",
   description: "할 일을 기록해보세요.",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className={cn("h-full", "antialiased", roboto.variable, notoSansKR.variable, "font-sans", geist.variable)}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col justify-center max-[1261px]:px-5">{children}</body>
     </html>
   );
 }
