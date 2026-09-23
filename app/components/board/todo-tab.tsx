@@ -21,7 +21,7 @@ export default function TodoTab() {
   const { activeTab, setActiveTab } = useTabStore();
 
   return (
-    <ul className="flex flex-wrap gap-3 p-5 border-b border-gray-100 max-[769px]:gap-1.5">
+    <ul className="flex flex-wrap gap-3 w-full p-5 border-b border-gray-100 max-[769px]:gap-1.5">
       {tabs.map((tab) => (
         <li key={tab.id}>
           <button

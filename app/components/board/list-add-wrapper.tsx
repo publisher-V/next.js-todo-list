@@ -4,7 +4,7 @@ import TodayProcess from "./today-process";
 
 export default function ListAddWrapper() {
   return (
-    <div className="w-1/3 p-5 bg-white rounded-xl border border-gray-100 shadow-[4px_4px_12px_rgba(149,157,165,0.1)] max-[1025px]:w-[40%] max-[769px]:w-full">
+    <div className="w-100 p-5 bg-white rounded-xl border border-gray-100 shadow-[4px_4px_12px_rgba(149,157,165,0.1)] max-[1025px]:w-[40%] max-[769px]:w-full">
       <ListForm />
       <PriorityList />
       <TodayProcess />

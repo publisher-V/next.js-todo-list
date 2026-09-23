@@ -2,78 +2,31 @@
 
 import { useTabStore } from "../../store/tab-store";
 import { useEffect, useState } from "react";
-import { getTodos, migrateTodos } from "@/app/actions/todos-action";
-import { supabase } from "@/lib/supabase/client";
 import { X, ShieldAlert } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldContent, FieldTitle, FieldDescription } from "@/components/ui/field";
-import { Todo, useTodoStore } from "../../store/todo-store";
-import { format } from "date-fns";
+import { getLocalTimeZone, today, type CalendarDate } from "@internationalized/date";
+
+import { Calendar } from "@/components/ui/react-aria-calendar";
+import { useTodoStore } from "../../store/todo-store";
+import { format, isSameDay } from "date-fns";
 import { ko } from "date-fns/locale";
 import { AnimatePresence, motion } from "motion/react";
-import { TodoListSkeletonItems } from "./skeleton/todo-list-skeleton";
+import { TodoCalendarSkeleton, TodoListSkeletonItems } from "./skeleton/todo-list-skeleton";
 
 export default function TodoList() {
-  const { lists, setLists, removeList } = useTodoStore();
+  const { lists, error, isLoading, loadTodos, removeList } = useTodoStore();
   const { activeTab } = useTabStore();
   const completeList = useTodoStore((state) => state.toggleComplete);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<{ state: boolean; message: string | null }>({ state: false, message: null });
   const [animatingTodo, setAnimatingTodo] = useState<{
     id: string | number;
     complete: boolean;
   } | null>(null);
+  const [date, setDate] = useState<CalendarDate | null>(today(getLocalTimeZone()));
 
   useEffect(() => {
-    const loadTodos = async () => {
-      try {
-        const savedLists = localStorage.getItem("todo-list");
-
-        const localTodos: Todo[] = savedLists
-          ? JSON.parse(savedLists).map((list: Todo) => ({
-              ...list,
-              date: new Date(list.date),
-            }))
-          : [];
-
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          setLists(localTodos);
-          return;
-        }
-
-        if (localTodos.length > 0) {
-          const result = await migrateTodos(localTodos);
-
-          if (result.isLoggedIn) {
-            localStorage.removeItem("todo-list");
-          }
-        }
-
-        const todos = await getTodos();
-
-        setLists(
-          todos.map((todo) => ({
-            ...todo,
-            date: new Date(todo.date),
-          })),
-        );
-      } catch (error) {
-        setError({
-          state: true,
-          message: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadTodos();
-  }, [setLists]);
+  }, [loadTodos]);
 
   const filteredLists = lists.filter((list) => (activeTab === "complete" ? list.complete : activeTab === "process" ? !list.complete : true));
 
@@ -87,6 +40,8 @@ export default function TodoList() {
 
     return a.date.getTime() - b.date.getTime();
   });
+
+  const dateFilteredLists = date ? sortedLists.filter((list) => isSameDay(list.date, date.toDate(getLocalTimeZone()))) : [];
 
   const completeHandler = (id: string | number) => {
     const filteredlist = lists.find((list) => list.id === id);
@@ -106,6 +61,13 @@ export default function TodoList() {
 
   return (
     <>
+      {isLoading ? (
+        <TodoCalendarSkeleton />
+      ) : (
+        <article className="p-5 pb-2">
+          <Calendar value={date} onChange={setDate} className="w-full rounded-lg border [--cell-size:--spacing(12)]" captionLayout="dropdown" onVisibleDateChange={() => setDate(null)} TodoLists={lists} />
+        </article>
+      )}
       {error.state ? (
         <motion.p key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center justify-center w-full min-h-37.5 text-red-500">
           <ShieldAlert />
@@ -116,10 +78,10 @@ export default function TodoList() {
       ) : isLoading ? (
         <AnimatePresence mode="wait" initial={false}>
           <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-5">
-            <TodoListSkeletonItems count={5} />
+            <TodoListSkeletonItems count={1} />
           </motion.ul>
         </AnimatePresence>
-      ) : sortedLists.length === 0 ? (
+      ) : dateFilteredLists.length === 0 ? (
         <AnimatePresence mode="wait" initial={false}>
           <motion.p key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center justify-center w-full min-h-37.5 text-slate-400 max-[769px]:text-[14px]">
             {activeTab === "process" ? "진행중인 할 일이 없습니다." : activeTab === "complete" ? "완료된 할 일이 없습니다." : "할 일 리스트가 없습니다."}
@@ -128,7 +90,7 @@ export default function TodoList() {
       ) : (
         <AnimatePresence mode="wait" initial={false}>
           <motion.ul key={activeTab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-5">
-            {sortedLists.map((list) => {
+            {dateFilteredLists.map((list) => {
               const priorityCss = list.priority === "높음" ? "before:bg-red-600" : list.priority === "보통" ? "before:bg-yellow-300" : list.priority === "낮음" ? "before:bg-(--primary)" : "";
               const formatedDate = list.date ? format(list.date, "yyyy.MM.dd", { locale: ko }) : "";
 

@@ -7,6 +7,7 @@ import SignOutButton from "./sign-out-button";
 import { useEffect, useState } from "react";
 import SignUpButton from "./sign-up-button";
 import { useTodoStore } from "@/app/store/todo-store";
+import AuthMenuSkeleton from "./skeleton/auth-menu-skeleton";
 
 interface Todo {
   id: string | number;
@@ -18,6 +19,7 @@ interface Todo {
 
 export default function AuthMenu() {
   const { setLists } = useTodoStore();
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function AuthMenu() {
       } = await supabase.auth.getUser();
 
       setUser(user);
+      setIsLoading(false);
     };
 
     getUser();
@@ -66,7 +69,9 @@ export default function AuthMenu() {
 
   return (
     <div className="flex items-center justify-end w-full h-20 max-w-300 mx-auto">
-      {user ? (
+      {isLoading ? (
+        <AuthMenuSkeleton />
+      ) : user ? (
         <SignOutButton signOut={signOut} />
       ) : (
         <div className="flex gap-x-3">
