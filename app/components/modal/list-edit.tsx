@@ -46,6 +46,8 @@ export default function ListEdit({ listId }: Props) {
 
     if (!trimmedContent) return;
 
+    close();
+
     await updateTodo({
       ...matchedList,
       content: trimmedContent,
@@ -55,8 +57,6 @@ export default function ListEdit({ listId }: Props) {
       end_time: endTime,
       all_day: allDay,
     });
-
-    close();
   };
 
   const allDayCheckedHandler = () => {
