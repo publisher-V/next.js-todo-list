@@ -133,3 +133,44 @@ body {
     @apply font-sans;
   }
 }
+
+.os-scrollbar.os-theme-custom {
+  --os-size: 4px;
+  --os-handle-bg: #a1a1a1;
+  --os-handle-bg-hover: #8e8e8e;
+  --os-handle-bg-active: #a0a0a0;
+
+  --os-padding-axis: 12px;
+  --os-handle-border-radius: 999px;
+}
+
+.os-scrollbar.os-theme-custom.os-scrollbar-vertical {
+  right: 8px;
+}
+
+.os-scrollbar.os-theme-modal-custom {
+  --os-size: 4px;
+  --os-handle-bg: #a1a1a1;
+  --os-handle-bg-hover: #8e8e8e;
+  --os-handle-bg-active: #a0a0a0;
+
+  --os-padding-axis: 0px;
+  --os-handle-border-radius: 999px;
+}
+
+.os-scrollbar.os-theme-modal-custom.os-scrollbar-vertical {
+  right: 0px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .os-scrollbar.os-theme-custom,
+  .os-scrollbar.os-theme-modal-custom {
+    display: none;
+  }
+}
+
+@media all and (max-width: 1024px) {
+  .os-scrollbar.os-theme-custom.os-scrollbar-vertical {
+    right: 0px;
+  }
+}

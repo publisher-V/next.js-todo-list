@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
@@ -9,8 +8,8 @@ import SignSection from "../../../components/sign/sign-section";
 import SignForm from "../../../components/sign/sign-form";
 import SignInput from "../../../components/sign/sign-input";
 import SignFormButton from "../../../components/sign/sign-form-button";
-import SignAuth from "../../../components/sign/sign-auth";
-import SignAuthButton from "../../../components/sign/sign-auth-button";
+// import SignAuth from "../../../components/sign/sign-auth";
+// import SignAuthButton from "../../../components/sign/sign-auth-button";
 import SignTitle from "../../../components/sign/sign-title";
 
 import { Field, FieldContent } from "@/components/ui/field";
@@ -18,12 +17,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import Terms from "../../../components/modal/terms";
 import Privacy from "../../../components/modal/privacy";
+import { useModalStore } from "@/app/store/modal-store";
 
 const privacyButtonCss = "relative inline-block cursor-pointer text-(--primary) font-medium hover:text-[#4471e2] transition-colors before:absolute before:w-full before:h-[1px] before:left-0 before:top-full before:bg-(--primary)";
 
 export default function SignUpPage() {
-  const [termsIsOpen, setTermsIsOpen] = useState(false);
-  const [privacyIsOpen, setPrivacyIsOpen] = useState(false);
+  const openModal = useModalStore((state) => state.openModal);
+  const setIsClose = useModalStore((state) => state.setIsOpen);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [values, setValues] = useState({
     name: "",
@@ -43,14 +43,6 @@ export default function SignUpPage() {
   });
 
   const router = useRouter();
-
-  const termsOnClose = () => {
-    setTermsIsOpen(false);
-  };
-
-  const privacyOnClose = () => {
-    setPrivacyIsOpen(false);
-  };
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
@@ -145,8 +137,8 @@ export default function SignUpPage() {
 
   return (
     <>
-      {termsIsOpen && <Terms onClose={termsOnClose} />}
-      {privacyIsOpen && <Privacy onClose={privacyOnClose} />}
+      {openModal["terms"] && <Terms />}
+      {openModal["privacy"] && <Privacy />}
       <SignSection>
         <SignTitle title="회원가입" description="지금 회원가입하고 다양한 서비스를 이용해보세요." />
         <SignForm onSubmit={signUp}>
@@ -176,11 +168,11 @@ export default function SignUpPage() {
             <Field orientation="horizontal">
               <Checkbox id="terms" name="terms" checked={termsAccepted} onCheckedChange={checkedHandler} />
               <FieldContent className="block text-sm text-slate-600">
-                <button type="button" className={privacyButtonCss} onClick={() => setTermsIsOpen(true)}>
+                <button type="button" className={privacyButtonCss} onClick={() => setIsClose("terms")}>
                   이용약관
                 </button>{" "}
                 및{" "}
-                <button type="button" className={privacyButtonCss} onClick={() => setPrivacyIsOpen(true)}>
+                <button type="button" className={privacyButtonCss} onClick={() => setIsClose("privacy")}>
                   개인정보처리방침
                 </button>
                 에 동의합니다.
@@ -190,22 +182,9 @@ export default function SignUpPage() {
           </div>
           <SignFormButton>회원가입</SignFormButton>
         </SignForm>
-        {/* <p className="relative w-full py-3 text-center before:absolute before:left-0 before:top-[50%] before:w-full before:h-[1px] before:bg-slate-200 before:translate-y-[-50%] before:z-0">
-          <span className="relative z-1 bg-white px-2 text-sm text-slate-400">또는</span>
-        </p> */}
-        {/* <SignAuth>
-          <SignAuthButton>
-            <Image src="/google_icon.webp" alt="구글 아이콘" width={16} height={16} />
-            <span>Google로 회원가입</span>
-          </SignAuthButton>
-          <SignAuthButton>
-            <Image src="/naver_icon.ico" alt="네이버 아이콘" width={16} height={16} />
-            <span>네이버로 회원가입</span>
-          </SignAuthButton>
-        </SignAuth> */}
         <p className="mt-4 text-sm text-slate-400">
           이미 계정이 있으신가요?
-          <Link href="/sign-in" className="ml-1 text-(--primary) font-medium hover:text-[#4471e2] transition-colors">
+          <Link href="/sign-in" className="ml-1 text-primary font-medium hover:text-[#4471e2] transition-colors">
             로그인
           </Link>
         </p>

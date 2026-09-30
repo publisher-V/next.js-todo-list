@@ -129,17 +129,17 @@ function CalendarInner({
   onVisibleDateChange?: () => void;
   TodoLists?: Todo[];
 }) {
-  const hasListCss = "after:absolute after:content-[''] after:bottom-1.5 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary data-[selected-single=true]:after:bg-white";
+  const hasListCss = "after:absolute after:content-[''] after:bottom-1.5 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary data-[selected-single=true]:after:bg-white max-[481px]:after:w-1 max-[481px]:after:h-1 max-[481px]:after:bottom-1";
   const todoDateKeys = new Set(TodoLists.map((list) => format(list.date, "yyyy.MM.dd", { locale: ko })));
 
   return (
     <div className="relative flex flex-col gap-4 md:flex-row">
-      <header className="absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1">
-        <Button variant={buttonVariant} slot="previous" className="size-(--cell-size) p-0 select-none aria-disabled:opacity-50">
-          <ChevronLeftIcon className="cn-rtl-flip size-4" />
+      <header className="absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1 max-[361px]:top-[calc(var(--cell-size)/4.2)]">
+        <Button variant={buttonVariant} slot="previous" className="size-(--cell-size) p-0 select-none aria-disabled:opacity-50 max-[361px]:size-[calc(var(--cell-size)/2.1)]">
+          <ChevronLeftIcon className="cn-rtl-flip size-4 max-[361px]:size-3" />
         </Button>
-        <Button variant={buttonVariant} slot="next" className="size-(--cell-size) p-0 select-none aria-disabled:opacity-50">
-          <ChevronRightIcon className="cn-rtl-flip size-4" />
+        <Button variant={buttonVariant} slot="next" className="size-(--cell-size) p-0 select-none aria-disabled:opacity-50 max-[361px]:size-[calc(var(--cell-size)/2.1)]">
+          <ChevronRightIcon className="cn-rtl-flip size-4 max-[361px]:size-3" />
         </Button>
       </header>
       {Array.from({ length: numberOfMonths }, (_, i) => (
@@ -170,7 +170,7 @@ function CalendarInner({
                         data-range-middle={renderProps.isSelected && !renderProps.isSelectionStart && !renderProps.isSelectionEnd && isRange}
                         className={cn(
                           buttonVariants({ variant: "ghost", size: "icon" }),
-                          "relative isolate z-10 flex aspect-square h-full w-full size-(--cell-size) shrink-0 flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70 cursor-pointer",
+                          "relative isolate z-10 flex aspect-square h-full w-full size-(--cell-size) shrink-0 flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70 cursor-pointer max-[481px]:size-[calc(var(--cell-size)/1.4)] max-[481px]:text-[13px] max-[361px]:size-[calc(var(--cell-size)/1.7)] max-[361px]:text-[11px]",
                           hasTodo && hasListCss,
                         )}
                       >

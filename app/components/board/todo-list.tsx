@@ -2,27 +2,32 @@
 
 import { useTabStore } from "../../store/tab-store";
 import { useEffect, useState } from "react";
-import { X, ShieldAlert } from "lucide-react";
+import { X, ShieldAlert, Pencil } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldContent, FieldTitle, FieldDescription } from "@/components/ui/field";
 import { getLocalTimeZone, today, type CalendarDate } from "@internationalized/date";
 
 import { Calendar } from "@/components/ui/react-aria-calendar";
-import { useTodoStore } from "../../store/todo-store";
+import { Todo, useTodoStore } from "../../store/todo-store";
 import { format, isSameDay } from "date-fns";
 import { ko } from "date-fns/locale";
 import { AnimatePresence, motion } from "motion/react";
 import { TodoCalendarSkeleton, TodoListSkeletonItems } from "./skeleton/todo-list-skeleton";
+import { useModalStore } from "@/app/store/modal-store";
+import ListEdit from "../modal/list-edit";
 
 export default function TodoList() {
   const { lists, error, isLoading, loadTodos, removeList } = useTodoStore();
   const { activeTab } = useTabStore();
   const completeList = useTodoStore((state) => state.toggleComplete);
+  const openModal = useModalStore((state) => state.openModal);
+  const setIsOpen = useModalStore((state) => state.setIsOpen);
   const [animatingTodo, setAnimatingTodo] = useState<{
     id: string | number;
     complete: boolean;
   } | null>(null);
   const [date, setDate] = useState<CalendarDate | null>(today(getLocalTimeZone()));
+  const [editListId, setEditListId] = useState<Todo["id"] | null>(null);
 
   useEffect(() => {
     loadTodos();
@@ -30,15 +35,29 @@ export default function TodoList() {
 
   const filteredLists = lists.filter((list) => (activeTab === "complete" ? list.complete : activeTab === "process" ? !list.complete : true));
 
+  const timeToSeconds = (time?: string | null) => {
+    if (!time) return Infinity;
+
+    const [hours, minutes, seconds = 0] = time.split(":").map(Number);
+
+    return hours * 3600 + minutes * 60 + seconds;
+  };
+
   const sortedLists = [...filteredLists].sort((a, b) => {
+    const dateCompare = format(a.date, "yyyy-MM-dd").localeCompare(format(b.date, "yyyy-MM-dd"));
+
     if (a.complete !== b.complete) {
       return a.complete ? 1 : -1;
+    }
+
+    if (dateCompare !== 0) {
+      return dateCompare;
     }
 
     if (!a.date) return 1;
     if (!b.date) return -1;
 
-    return a.date.getTime() - b.date.getTime();
+    return timeToSeconds(a.start_time) - timeToSeconds(b.start_time);
   });
 
   const dateFilteredLists = date ? sortedLists.filter((list) => isSameDay(list.date, date.toDate(getLocalTimeZone()))) : [];
@@ -61,10 +80,11 @@ export default function TodoList() {
 
   return (
     <>
+      {openModal["list-edit"] && editListId !== null && <ListEdit listId={editListId} />}
       {isLoading ? (
         <TodoCalendarSkeleton />
       ) : (
-        <article className="p-5 pb-2">
+        <article className="p-5 pb-2 max-[481px]:p-3">
           <Calendar value={date} onChange={setDate} className="w-full rounded-lg border [--cell-size:--spacing(12)]" captionLayout="dropdown" onVisibleDateChange={() => setDate(null)} TodoLists={lists} />
         </article>
       )}
@@ -101,9 +121,9 @@ export default function TodoList() {
                 <motion.li layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} key={list.id} className="relative py-4 border-b border-gray-100 last:border-b-0">
                   <Field orientation="horizontal">
                     <Checkbox id={`todo-${list.id}`} name={`todo-${list.id}`} checked={isCompleted} onCheckedChange={() => completeHandler(list.id)} />
-                    <FieldContent className="gap-y-1 items-start">
+                    <FieldContent className="items-start">
                       <FieldTitle
-                        className={`relative max-w-[calc(100%-30px)] pl-4 text-[14px] transition-colors duration-300 before:absolute before:top-1 before:left-0 before:w-2.5 before:h-2.5 before:rounded-[100%] after:absolute after:left:0 after:h-px after:bg-slate-400 after:transition-[width] after:duration-300 ${isCompleted ? "after:w-[calc(100%-14px)] text-slate-300" : "after:w-0"} ${priorityCss}`}
+                        className={`relative max-w-[calc(100%-30px)] mb-1.5 pl-4 text-[14px] transition-colors duration-300 before:absolute before:top-1 before:left-0 before:w-2.5 before:h-2.5 before:rounded-[100%] after:absolute after:left:0 after:h-px after:bg-slate-400 after:transition-[width] after:duration-300 ${isCompleted ? "after:w-[calc(100%-14px)] text-slate-300" : "after:w-0"} ${priorityCss}`}
                       >
                         {list.content}
                       </FieldTitle>
@@ -112,11 +132,38 @@ export default function TodoList() {
                       >
                         {formatedDate}
                       </FieldDescription>
+                      {!list.all_day && list.start_time && list.end_time && (
+                        <FieldDescription
+                          className={`relative pl-4 text-[12px] text-slate-400 transition-colors duration-300 before:absolute before:left:0 before:top-1/2 before:translate-y-[-50%] before:h-px before:bg-slate-400 before:transition-[width] before:duration-300 ${isCompleted ? "before:w-[calc(100%-14px)] text-slate-300" : "before:w-0"}`}
+                        >
+                          {list.start_time?.replace(/^(\d{2}:\d{2}):\d{2}$/, "$1") ?? ""} ~ {list.end_time?.replace(/^(\d{2}:\d{2}):\d{2}$/, "$1") ?? ""}
+                        </FieldDescription>
+                      )}
+                      {list.all_day && (
+                        <FieldDescription
+                          className={`relative pl-4 text-[12px] text-slate-400 transition-colors duration-300 before:absolute before:left:0 before:top-1/2 before:translate-y-[-50%] before:h-px before:bg-slate-400 before:transition-[width] before:duration-300 ${isCompleted ? "before:w-[calc(100%-14px)] text-slate-300" : "before:w-0"}`}
+                        >
+                          종일
+                        </FieldDescription>
+                      )}
                     </FieldContent>
                   </Field>
-                  <button onClick={() => removeList(list.id)} className="absolute top-1/2 right-0 translate-y-[-50%] cursor-pointer">
-                    <X strokeWidth={3} size={16} className="text-slate-400 hover:text-foreground transition-colors" />
-                  </button>
+                  <div className="absolute top-1/2 right-0 translate-y-[-50%] ">
+                    {!list.complete && (
+                      <button
+                        onClick={() => {
+                          setEditListId(list.id);
+                          setIsOpen("list-edit");
+                        }}
+                        className="mr-2 cursor-pointer"
+                      >
+                        <Pencil strokeWidth={3} size={14} className="text-slate-400 hover:text-foreground transition-colors" />
+                      </button>
+                    )}
+                    <button onClick={() => removeList(list.id)} className="cursor-pointer">
+                      <X strokeWidth={3} size={16} className="text-slate-400 hover:text-foreground transition-colors" />
+                    </button>
+                  </div>
                 </motion.li>
               );
             })}

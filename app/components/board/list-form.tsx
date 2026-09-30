@@ -10,7 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Field, FieldContent, FieldTitle } from "@/components/ui/field";
 import ContentTitle from "./content-title";
 import { useTodoStore } from "../../store/todo-store";
 
@@ -23,15 +25,19 @@ const items = [
 export default function ListForm() {
   const { setList } = useTodoStore();
 
-  const [date, setDate] = useState<Date>();
-  const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [priority, setPriority] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [date, setDate] = useState<Date>();
+
   const [validate, setValidate] = useState({
     content_validate: false,
     priority_validate: false,
     date_validate: false,
   });
+  const [allDay, setAllDay] = useState(false);
+  const [open, setOpen] = useState(false);
   const [validateSentence, setValidateSentence] = useState(false);
 
   const listAddHandler = (e: React.FormEvent<HTMLFormElement>) => {
@@ -47,11 +53,17 @@ export default function ListForm() {
       content: content.trim(),
       priority,
       date,
+      start_time: startTime,
+      end_time: endTime,
+      all_day: allDay,
       complete: false,
     });
 
     setContent("");
     setPriority("");
+    setStartTime("");
+    setEndTime("");
+    setAllDay(false);
     setDate(undefined);
   };
 
@@ -138,6 +150,35 @@ export default function ListForm() {
             {validateSentence && !validate.date_validate && <p className="mt-1 text-[12px] text-red-400 font-medium">날짜를 선택해주세요.</p>}
           </div>
         </div>
+        <div className="flex items-center gap-x-1">
+          <Input
+            id="startTime"
+            type="time"
+            className="w-[calc(50%-4px)] h-8.75 bg-background border border-gray-200 rounded-[10px] font-medium text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-200 disabled:bg-[#e9eaef]"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            disabled={allDay}
+          />
+          <span>~</span>
+          <Input
+            id="endTime"
+            type="time"
+            className="w-[calc(50%-4px)] h-8.75 bg-background border border-gray-200 rounded-[10px] font-medium text-[13px] focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-gray-200 disabled:bg-[#e9eaef]"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            disabled={allDay}
+          />
+        </div>
+        <Field orientation="horizontal">
+          <Checkbox id="allTime" name="allTime" checked={allDay} onCheckedChange={setAllDay} />
+          <FieldContent className="gap-y-1 items-start">
+            <FieldTitle
+              className={`relative max-w-[calc(100%-30px)] text-[14px] transition-colors duration-300 before:absolute before:top-1 before:left-0 before:w-2.5 before:h-2.5 before:rounded-[100%] after:absolute after:left:0 after:h-px after:bg-slate-400 after:transition-[width] after:duration-300`}
+            >
+              종일
+            </FieldTitle>
+          </FieldContent>
+        </Field>
         <button className="h-8.75 bg-primary text-white rounded-[10px] cursor-pointer transition-colors text-[14px] hover:bg-[#4573e9]">추가하기</button>
       </form>
     </div>

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "@/lib/supabase/client";
-import { completeTodo, createTodo, deleteTodo, getTodos, migrateTodos } from "../actions/todos-action";
+import { completeTodo, createTodo, deleteTodo, getTodos, migrateTodos, updateTodo } from "../actions/todos-action";
+import { parseISO } from "date-fns";
 
 export interface Todo {
   id: string | number;
@@ -8,6 +9,9 @@ export interface Todo {
   priority: string;
   date: Date;
   complete: boolean;
+  start_time?: string | null;
+  end_time?: string | null;
+  all_day?: boolean | undefined;
 }
 
 interface State {
@@ -19,6 +23,7 @@ interface State {
   };
   setLists: (lists: Todo[]) => void;
   setList: (item: Todo) => void;
+  updateList: (updatedTodo: Todo) => void;
   removeList: (id: Todo["id"]) => void;
   toggleComplete: (id: Todo["id"], complete: Todo["complete"]) => void;
   loadTodos: () => Promise<void>;
@@ -51,6 +56,28 @@ export const useTodoStore = create<State>((set) => ({
     } catch (error) {
       set({ lists: previousLists });
       console.error(`할 일 추가 실패 : ${error}`);
+    }
+  },
+  updateList: async (updatedTodo) => {
+    const previousLists = useTodoStore.getState().lists;
+
+    const nextLists = previousLists.map((list) => (list.id === updatedTodo.id ? updatedTodo : list));
+
+    set({ lists: nextLists });
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        await updateTodo(updatedTodo.id, updatedTodo.content, updatedTodo.priority, updatedTodo.date, updatedTodo.start_time, updatedTodo.end_time, updatedTodo.all_day);
+      } else {
+        localStorage.setItem("todo-list", JSON.stringify(nextLists));
+      }
+    } catch (error) {
+      set({ lists: previousLists });
+      console.error(`할 일 수정 실패: ${error}`);
     }
   },
   removeList: async (id) => {
@@ -141,7 +168,7 @@ export const useTodoStore = create<State>((set) => ({
       set({
         lists: todos.map((todo) => ({
           ...todo,
-          date: new Date(todo.date),
+          date: parseISO(todo.date),
         })),
       });
     } catch (error) {
