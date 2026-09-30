@@ -4,15 +4,17 @@ type TodoListSkeletonProps = {
 
 function TodoRowSkeleton() {
   return (
-    <li className="flex gap-3 border-b border-gray-100 px-5 py-4 last:border-b-0">
+    <li className="relative flex gap-3 border-b border-gray-100 px-5 py-4 last:border-b-0 max-[481px]:px-1">
       <span className="h-4 w-4 shrink-0 animate-pulse rounded-ls bg-slate-200" />
 
       <div className="min-w-0 flex-1 space-y-2">
-        <span className="block h-3.5 w-3/5 animate-pulse rounded-full bg-slate-200" />
-        <span className="block h-3 w-1/4 animate-pulse rounded-full bg-slate-100" />
+        <span className="block h-3.5 w-40 animate-pulse rounded-full bg-slate-200 max-[361px]:w-30" />
+        <span className="block h-3 w-20 animate-pulse rounded-full bg-slate-100 max-[361px]:w-15" />
+        <span className="block h-3 w-20 animate-pulse rounded-full bg-slate-100 max-[361px]:w-15" />
       </div>
 
-      <span className="h-4 w-4 shrink-0 animate-pulse rounded-full bg-slate-100" />
+      <span className="absolute right-6 top-2/4 h-4 w-4 shrink-0 animate-pulse rounded-full bg-slate-100 translate-y-[-50%]" />
+      <span className="absolute right-0 top-2/4 h-4 w-4 shrink-0 animate-pulse rounded-full bg-slate-100 translate-y-[-50%]" />
     </li>
   );
 }
@@ -29,15 +31,15 @@ export function TodoListSkeletonItems({ count = 5 }: TodoListSkeletonProps) {
 
 export function TodoCalendarSkeleton() {
   return (
-    <div role="status" aria-label="캘린더를 불러오는 중" className="w-full rounded-lg bg-transparent p-5 pb-2 [--cell-size:--spacing(12)]">
-      <div className="relative flex w-full flex-col gap-4">
-        <div className="flex h-(--cell-size) items-center justify-between gap-1 px-(--cell-size)">
-          <span className="w-5 h-5 animate-pulse rounded-md bg-slate-200" />
+    <div role="status" aria-label="캘린더를 불러오는 중" className="w-full bg-transparent p-5 pb-2 [--cell-size:--spacing(12)] max-[481px]:p-3">
+      <div className="relative flex w-full flex-col gap-4 p-2 pb-4 rounded-lg border border-gray-100">
+        <div className="flex h-(--cell-size) items-center justify-between gap-1 px-5 max-[361px]:px-2">
+          <span className="w-5 h-5 animate-pulse rounded-md bg-slate-200 max-[361px]:rounded-xs max-[361px]:w-3 max-[361px]:h-3" />
           <div className="flex gap-x-2">
-            <span className="inline-block h-7 w-28 animate-pulse rounded-sm bg-slate-200" />
-            <span className="inline-block h-7 w-28 animate-pulse rounded-sm bg-slate-200" />
+            <span className="inline-block h-7 w-28 animate-pulse rounded-sm bg-slate-200 max-[481px]:w-20 max-[361px]:w-17" />
+            <span className="inline-block h-7 w-28 animate-pulse rounded-sm bg-slate-200 max-[481px]:w-20 max-[361px]:w-17" />
           </div>
-          <span className="w-5 h-5 animate-pulse rounded-md bg-slate-200" />
+          <span className="w-5 h-5 animate-pulse rounded-md bg-slate-200 max-[361px]:rounded-xs max-[361px]:w-3 max-[361px]:h-3" />
         </div>
 
         <div className="grid grid-cols-7 gap-y-2">
@@ -48,7 +50,7 @@ export function TodoCalendarSkeleton() {
           ))}
           {Array.from({ length: 42 }, (_, index) => (
             <div key={`day-${index}`} className="flex items-center justify-center">
-              <span className="size-(--cell-size) animate-pulse rounded-md bg-slate-100" />
+              <span className="size-(--cell-size) animate-pulse rounded-md bg-slate-100 max-[481px]:size-[calc(var(--cell-size)/1.4)] max-[361px]:size-[calc(var(--cell-size)/1.7)]" />
             </div>
           ))}
         </div>

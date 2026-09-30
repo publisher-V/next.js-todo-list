@@ -130,8 +130,8 @@ export default function ListEdit({ listId }: Props) {
             </Popover>
           </div>
         </div>
-        <div className="flex gap-x-2 mb-3">
-          <div className="w-[calc(50%-4px)]">
+        <div className="flex items-center gap-x-1 mb-3">
+          <div className="w-[calc(50%-9px)]">
             <Input
               id="startTime"
               type="time"
@@ -141,8 +141,8 @@ export default function ListEdit({ listId }: Props) {
               disabled={allDay}
             />
           </div>
-          <span>~</span>
-          <div className="w-[calc(50%-4px)]">
+          <span className="w-2.5 text-[13px]">~</span>
+          <div className="w-[calc(50%-9px)]">
             <Input
               id="endTime"
               type="time"
